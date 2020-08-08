@@ -1,0 +1,3 @@
+#This the the 404 error page to show
+
+ErrorDocument 404 http://localhost/BronzeChoco/admin/404.php
