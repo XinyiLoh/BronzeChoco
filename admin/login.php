@@ -3,24 +3,6 @@ session_start();
 include('includes/header.php'); 
 ?>
 
-<?php
-//if(isset($_POST['login_btn'])){
-//    $email_login = trim($_POST['email']);
-//    $pass_login = trim($_POST['password']);
-//    
-//    $query = "SELECT * FROM admin_info WHERE admin_email='$email_login' AND admin_pass='$pass_login'";
-//    $query_run = mysqli_query($connection,$query);
-//    
-//    if(mysqli_fetch_array($query_run)){
-//        $_SESSION['username'] = $email_login;
-//        header('Location: index.php');
-//    }else{
-//        $_SESSION['status'] = 'Email address / Password is invalid';
-//        header('Location: login.php');
-//    }
-//}
-?>
-
 <div class="container">
 
     <!-- Outer Row -->
@@ -37,12 +19,6 @@ include('includes/header.php');
                 <div class="p-5">
                   <div class="text-center">
                     <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
-                    <?php
-                    if(isset($_SESSION['status'])&& $_SESSION['status'] != ""){
-                        echo '<h2 class="bg-danger text-white">'.$_SESSION['status'].'</h2>';
-                        unset($_SESSION['status']);
-                    }
-                    ?>
                   </div>
                     <form class="user" action="code.php" method="POST">
                     <div class="form-group">

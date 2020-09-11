@@ -16,39 +16,67 @@
 <li class="nav-item active">
   <a class="nav-link" href="index.php">
     <i class="fas fa-fw fa-tachometer-alt"></i>
-    <span>Dashboard</span></a>
+    <span style="color: maroon">Dashboard</span></a>
 </li>
 
 <!-- Divider -->
 <hr class="sidebar-divider">
 
-<!-- Nav Item - Pages Collapse Menu -->
+<li class="nav-item">
+   <a class="nav-link" href="sendMail.php">
+    <i class="fas fa-paper-plane"></i>
+    <span style="color: maroon"><b>Send Mail</b></span></a>
+</li>
+
+<!-- Divider -->
+<hr class="sidebar-divider">
+
+<!-- Nav Item - -->
 <div class="sidebar-heading">
     Management
 </div>
 
+<?php 
+$str1 = $_SESSION['username'];
+$str2 = "bronzechoco@mail.com";
+
+if(strcmp($str1, $str2) === 0){
+?>
 <li class="nav-item">
   <a class="nav-link" href="register.php">
     <i class="fas fa-address-card"></i>
-    <span style="color: maroon">Admin</span></a>
+    <span style="color: maroon"><b>Admin</b></span></a>
 </li>
+    
+<?php
+}
+?>
 
 <li class="nav-item">
   <a class="nav-link" href="user.php">
     <i class="fas fa-users"></i>
-    <span style="color: maroon">User</span></a>
+    <span style="color: maroon"><b>Customer</b></span></a>
 </li>
 
 <li class="nav-item">
   <a class="nav-link" href="product.php">
     <i class="far fa-newspaper"></i>
-    <span style="color: maroon">Product</span></a>
+    <span style="color: maroon"><b>Product</b></span></a>
 </li>
 
 <li class="nav-item">
   <a class="nav-link" href="order.php">
     <i class="fas fa-clipboard"></i>
-    <span style="color: maroon">Order</span></a>
+    <span style="color: maroon"><b>Order</b></span></a>
+</li>
+
+<!-- Divider -->
+<hr class="sidebar-divider d-none d-md-block">
+
+<li class="nav-item">
+  <a class="nav-link" href="handbook.php">
+    <i class="fas fa-book-open"></i>
+    <span style="color: maroon"><b>Handbook</b></span></a>
 </li>
 
 <!-- Divider -->
@@ -76,7 +104,7 @@
             <i class="fa fa-bars"></i>
           </button>
 
-          <h1 style="color: maroon"><b>Admin Panel</b> | <a href="../index.html"><span style="color: yellow;">Bronze Choco</span></a></h1>
+          <h4 style="color: maroon"><b>Admin Panel</b> | <a href="../index.html"><span style="color: yellow;">Bronze Choco</span></a></h4>
           
           <!-- Topbar Navbar -->
           <ul class="navbar-nav ml-auto">

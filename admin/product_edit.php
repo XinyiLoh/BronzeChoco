@@ -1,57 +1,104 @@
 <?php
+ob_start(); //start buffering the output
 include('security.php'); 
 include('includes/header.php'); 
 include('includes/navbar.php'); 
 ?>
+
 <?php
 $show = 1;
+
 if(isset($_POST['updatebtn'])) {
  
     if (isset($_POST['edit_id']) && !empty($_POST['edit_id'])) {
        $id = $_POST['edit_id'];
     } else {
-        echo "No Product ID found</li>";
+        $_SESSION['status'] = "No Product ID found</li>";
+        $_SESSION['status_code'] = "error";
     }
-        
+    
+    $message = array();
+    
     $cat_id  = $_POST['category'];
     $title = trim($_POST['edit_productTitle']);
     $price = trim($_POST['edit_productPrice']);
     $desc = trim($_POST['edit_productDescription']);
     $image = $_FILES['productImage']['name'];
     $stock = trim($_POST['edit_productStock']);
-    $temp = 'upload/' . $_FILES['productImage']['name'];
+//    $temp = 'upload/' . $_FILES['productImage']['name'];
     
     $prod_query = "SELECT * FROM product_info WHERE product_id=".$id."";
     $prod_query_run = mysqli_query($connection,$prod_query);
     foreach ($prod_query_run as $prod_row) {
-
-        if(empty($cat_id)){
+        if(empty($cat_id)){                             //if do not have new category
             $cat_data = $prod_row['cat_id'];
         }else{
             $cat_data = $cat_id;
         }
-
         //update w/ existing image
         if(empty($image)){
-            $image_data = $prod_row['product_image'];
+            $image_data = $prod_row['product_image'];       //if do not have new file
         }else{
-
             if($img_path = 'upload/'.$prod_row['product_image']){
                 unlink($img_path);
                 $image_data = $image;
             }
         }
     }
+    
+    $temp = 'upload/' .$image_data;
+    $imageFileType = strtolower(pathinfo($temp,PATHINFO_EXTENSION));
 
-    if(!preg_match ("/^[0-9]+(\.[0-9]{2})?$/", $price) || !preg_match ("/^[0-9]+$/",$stock)){
+    //check category
+    if($cat_data == null || $cat_data == ""){
+        array_push($message,"Please select a category.");
+        $type = "error";
+    }
+    
+    //check title
+    if($title == null || $title == ""){
+        array_push($message,"Please enter the title.");
+        $type = "error";
+    }
+    
+    //check price
+    if($price  == null || $price == ""){
+        array_push($message,"Please enter the price.");
+        $type = "error";
+    }elseif(!preg_match ("/^[0-9]+(\.[0-9]{2})?$/", $price)){
+        array_push($message,"Invalid price format.");
+        $type = "error";
+    }
+    
+    //check description
+    if($desc  == null || $desc  == ""){
+        array_push($message,"Please enter the description.");
+        $type = "error";
+    }
+    
+    //check image
+    if($image_data == null || $image_data  == ""){
+        array_push($message,"Please upload the image.");
+        $type = "error";
+    }elseif($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"){
+        array_push($message,"Only JPG, PNG and JPEG are allowed.");
+        $type = "error";
+    }elseif($image_data > 500000){
+        array_push($message,"Sorry, your file is too large.");
+        $type = "error";
+    }
 
-        if(!preg_match ("/^[0-9]+(\.[0-9]{2})?$/", $price)){
-            $_SESSION['status'] = "Price format invalid";
-        }else{
-            $_SESSION['status'] = "Stock format invalid";
-        }
+    //check stock
+    if($stock == null || $stock  == ""){
+        array_push($message,"Please enter the stock.");
+        $type = "error";
+    }elseif(!preg_match ("/^[0-9]+$/",$stock)){
+        array_push($message,"Please enter only number(s) for stock.");
+        $type = "error";
+    }
+    
+    if(empty($message)){
         
-    }else{
         $query = "UPDATE product_info SET cat_id='".$cat_data."',product_title='".$title."',product_price='".$price."',product_desc='".$desc."',product_image='".$image_data."',product_stock='".$stock."' WHERE product_id='".$id."';";
         $query_run = mysqli_query($connection, $query);
 
@@ -59,22 +106,28 @@ if(isset($_POST['updatebtn'])) {
 
             if (empty($image)) {
 
-                $_SESSION['success'] = "Product Edited with existing image";
-                echo "<script>window.location = 'product.php'</script>";
+                $_SESSION['status'] = "Product Edited with existing image";
+                $_SESSION['status_code'] = "success";
+//                echo "<script>window.location = 'product.php'</script>";
 
             } else {
                 move_uploaded_file($_FILES['productImage']['tmp_name'],$temp);
-                $_SESSION['success'] = "Product Edited with new image";
-                echo "<script>window.location = 'product.php'</script>";
+                $_SESSION['status'] = "Product Edited with new image";
+                $_SESSION['status_code'] = "success";
+//                header('Location: product.php');
+//                echo "<script>window.location = 'product.php'</script>";
 
             }
 
         } else {
             $_SESSION['status'] = "Product NOT Edited".$query;
-            echo "<script>window.location = 'product.php'</script>";
-            echo $query;
+            $_SESSION['status_code'] = "error";
+//            header('Location: product.php');
+//            echo "<script>window.location = 'product.php'</script>";
+//            echo $query;
         }
     }
+
 }
 ?>
 
@@ -87,13 +140,19 @@ if(isset($_POST['updatebtn'])) {
   <div class="card-body">
       
     <?php
-    
-    if(isset($_SESSION['notUpdated'])&& $_SESSION['notUpdated'] != ''){
-        echo'<h2 class="bg-warning text-white">'.$_SESSION['notUpdated'].'</h2>';
-        unset($_SESSION['notUpdated']);
+      
+    if (!empty($message)) {
+        
+        echo '<span class='.$type.'><small><ul>';
+        foreach ($message as $value) {
+              echo '<li>';
+              echo $value;
+              echo '</li>';
+        }
         $show = 0;
+        echo '</small></ul></span><br/>';
     }
-    
+
     if (isset($_POST['edit_btn']) || $show === 0) {
 
     $id = $_POST['edit_id'];
@@ -114,9 +173,9 @@ if(isset($_POST['updatebtn'])) {
                 
                 <?php
                 $cat = array (
-                    1 => "Pure",
-                    2 => "Fruity",
-                    3 => "Nutty"
+                    1 => "Milk",
+                    2 => "Dark",
+                    3 => "White"
                 );
 
                 $q = "SELECT cat_id,cat_title FROM category";
@@ -146,8 +205,9 @@ if(isset($_POST['updatebtn'])) {
             <textarea name="edit_productDescription" cols="50" rows="5"><?php echo $row['product_desc']; ?></textarea>
         </div>
         <div class="form-group">
+            <img src='upload/<?php echo $row['product_image']; ?>' alt="Image" height=100 width=200 /><br/>
             <label>Image :</label>
-            <input type="file" name="productImage" id="productImage" value="<?php echo $row['product_image']; ?>" accept = "image/png, image/jpeg, image/jpg" >
+            <input type="file" name="productImage" id="productImage" accept = "image/*" >
         </div>
         <div class="form-group">
             <label>Stock :</label><input type="text" name="edit_productStock" value="<?php echo $row['product_stock']; ?>" size="10" maxlength="10" pattern="/^\d{0-9}$/" class="form-control" required>

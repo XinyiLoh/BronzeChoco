@@ -1,113 +1,60 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php 
+session_start();
+include('headerFooter/header.php'); 
+include('config.php');
+?>
 
-<head>
-
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="">
-  <meta name="author" content="">
-
-  <title>Bronze Choco</title>
-
-  <!-- Bootstrap core CSS -->
-  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- Custom styles for this template -->
-  <link href="css/modern-business.css" rel="stylesheet">
-
-  <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
-  <link href="css/login.css" rel="stylesheet">
-  <link href="css/cart.css" rel="stylesheet">
-  
-  <style> 
-    /* Modify the background color */ 
-      
-    .navbar-custom { 
-        background-color: rgb(233, 205, 171); 
-    } 
-    /* Modify brand and text color */ 
-      
-    .navbar-custom .navbar-brand, 
-    .navbar-custom .navbar-text { 
-        color: black; 
-
-      
-    } 
-
-    .footer-custom{
-      background-color: rgb(233, 205, 171); 
-      border-top:     20px solid rgb(233, 205, 171) ;
-      border-bottom:     20px solid rgb(233, 205, 171) ;
-      
-
-    }
+<?php
+if(isset($_POST['signin'])){
+    $email_login = trim($_POST['login_email']);
+    $pass_login = trim($_POST['login_password']);
     
-    .card{
-        border: 4px solid  ;
-        outline: none;
-        border-color: rgb(233, 205, 171);
-        box-shadow: 0 0 20px brown;
+    $query = "SELECT * FROM user_info WHERE email='$email_login' AND password='$pass_login'";
+    $query_run = mysqli_query($connection,$query);
+    $row = mysqli_fetch_assoc($query_run);
+    
+    if(mysqli_num_rows($query_run) > 0){
+        $_SESSION['username'] = $row['first_name'];
+        $_SESSION['status'] = 'Successfully Log In !';
+        echo "<script>window.location = 'index.php'</script>";
+//        header('Location: index.php');
+    }else{
+        $_SESSION['status'] = 'Email address / Password is invalid';
+//        header('Location: login.php');
     }
-</style> 
+}
 
+if(isset($_POST['forgetpassword'])){
+    $email_login = htmlspecialchars(trim($_POST['login_email']));
+    
+    if(empty($email_login)){
+        echo '<script type="text/javascript">alert("Please fill in the email address!");</script>';  
+    }else{
+        
+        $query = "SELECT * FROM user_info WHERE email='$email_login'";
+        $query_run = mysqli_query($connection,$query);
 
-</head>
-
-<body>
-
-  <!-- Navigation -->
-  <nav class="navbar fixed-top navbar-expand-lg navbar-custom fixed-top">
-    <div class="container">
-      <a class="navbar-brand" href="index.html"><img src="logo.png" width="30px" height="30px"> BRONZE CHOCO</a>
-      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarResponsive">
-           <form action="#">
-              <input type="text" placeholder="Search.." name="search">
-              <button class="btn-dark" type="submit"><i class="fa fa-search"></i></button>
-          </form>
-        <ul class="navbar-nav ml-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="about.html" style="color: black;">About</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="contact.html" style="color: black;">Contact</a>
-          </li>
-          <li class="nav-item active dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownPortfolio" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: black;">
-              Chocolates
-            </a>
-            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownPortfolio">
-              <a class="dropdown-item" href="milk _chocolate.html" style="color: black;">1. Milk  Chocolates</a>
-              <a class="dropdown-item" href="white_chocolate.html" style="color: black;">2. White Chocolates</a>
-              <a class="dropdown-item" href="dark_chocolate.html" style="color: black;">3. Dark  Chocolates</a>
-              
-            </div>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownBlog" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: black;"><img src="user.png" width="25px" height="25px">
-              
-            </a>
-            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownBlog">
-              <a class="dropdown-item" href="login.php">Login</a>
-              <a class="dropdown-item" href="signup.php">Register</a>
-              <a class="dropdown-item" href="#">Logout</a>
-            </div>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownBlog" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: black;"><img src="image/gift.png" height="30px" title="cart">
-            </a>
-            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownBlog">
-              <a class="dropdown-item" href="cart.html">Cart</a>
-              <a class="dropdown-item" href="orderdetail.html">Order detail</a>
-            </div>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
+        if(mysqli_num_rows($query_run) > 0){
+            $row = mysqli_fetch_assoc($query_run);
+            $to = $email_login;
+            $email_subject = "Bronze Choco Forgot Password";
+            $email_body = "This is your account password : ".$row['password']."\n".
+                    "If you need any assistance, you may send us a message at http://localhost/BronzeChoco/contact.php";
+            $headers = "From: lohxy-wm19@student.tarc.edu.my";
+            
+            if(mail($to,$email_subject,$email_body,$headers) === true){
+                echo '<script type="text/javascript">alert("Email Sent! Check your inbox!");</script>';   
+            }else{
+                echo '<script type="text/javascript">alert("Email Failed. Please try again later.");</script>';
+            }
+        }else{
+            echo '<script type="text/javascript">alert("You havent set up an account!");</script>';
+//            $_SESSION['status'] = "You haven't set up an account!";
+        }
+        
+    }
+}
+?>
 
 <div class="container-fluid">
   <div class="row no-gutter">
@@ -118,24 +65,29 @@
           <div class="row">
             <div class="col-md-9 col-lg-8 mx-auto">
               <h3 class="login-heading mb-4">Login Here!</h3>
-              <form>
+              <?php
+              if (isset($_SESSION['status']) && $_SESSION['status'] != null) {
+                  echo "<h3>" . $_SESSION['status'] . "</h3>";
+                  unset($_SESSION['status']);
+              }
+              ?>
+              <form method="POST">
                 <div class="form-label-group">
-                  <input type="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
+                    <input type="email" id="inputEmail" name="login_email" class="form-control" placeholder="Email address" autofocus>
                   <label for="inputEmail">Email address</label>
                 </div>
 
                 <div class="form-label-group">
-                  <input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
+                    <input type="password" id="inputPassword" name="login_password" class="form-control" placeholder="Password" >
                   <label for="inputPassword">Password</label>
                 </div>
 
-                <div class="custom-control custom-checkbox mb-3">
-                  <input type="checkbox" class="custom-control-input" id="customCheck1">
-                  <label class="custom-control-label" for="customCheck1">Remember password</label>
-                </div>
-                <button class="btn btn-lg btn-warning btn-block btn-login text-uppercase font-weight-bold mb-2" type="submit">Sign in</button>
+                <button class="btn btn-lg btn-warning btn-block btn-login text-uppercase font-weight-bold mb-2" name="signin" type="submit">Sign in</button>
+                <button class="btn btn-lg btn-danger btn-block btn-login text-uppercase font-weight-bold mb-2" name="forgetpassword" type="submit" >Forget Password</button>
+                
                 <div class="text-center">
-                    <a class="small" href="signup.php">Register</a></div>
+                <a class="small" href="signup.php">Haven't set up an account? Register Here !</a>
+                </div>
               </form>
             </div>
           </div>
@@ -145,18 +97,5 @@
   </div>
 </div>
 
-  <!-- Footer -->
-  <footer class="footer-custom">
-    <div class="container">
-      <p class="m-0 text-center text-black">Copyright &copy; Bronze Choco 2020</p>
-    </div>
-    <!-- /.container -->
-  </footer>
 
-  <!-- Bootstrap core JavaScript -->
-  <script src="vendor/jquery/jquery.min.js"></script>
-  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-</body>
-
-</html>
+<?php include('headerFooter/footer.php'); ?>

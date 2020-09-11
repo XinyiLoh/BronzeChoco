@@ -13,6 +13,7 @@ if(isset($_POST['login_btn'])){
         header('Location: index.php');
     }else{
         $_SESSION['status'] = 'Email address / Password is invalid';
+        $_SESSION['status_code'] = "warning";
         header('Location: login.php');
     }
 }
